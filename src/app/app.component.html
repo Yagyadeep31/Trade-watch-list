@@ -1,39 +1,45 @@
-<div class="container">
+<header class="sticky-header">
+       <h2> Trade Dashboard </h2>
+</header>
+<div class="container main-content" style="margin-top:3%">
     <div class="row">
-        <div class="col-3 border">
+        <div class="col-3">
             <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
-                <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+                <a (click)="openAllTradeList()" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
                     <svg class="bi pe-none me-2" width="30" height="24" aria-hidden="true">
                         <use xlink:href="#bootstrap"></use>
                     </svg>
                     <span class="fs-5 fw-semibold">Trade Watch List</span>
                 </a>
                 <div class="list-group list-group-flush border-bottom scrollarea">
-                    <a href="#" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
+                    <a (click)="openTradeList('up')"  style ="background-color:green" class="list-group-item list-group-item-action  py-3 lh-sm" aria-current="true">
                         <div class="d-flex w-100 align-items-center justify-content-between">
                             <strong class="mb-1">WatchList 1</strong>
                             <small>Cars
-                                <mat-icon  style="color:green">arrow_upward</mat-icon>
+                                <mat-icon  style="color:yellow">arrow_upward</mat-icon>
                             </small>
                         </div>
-                        <div class="col-10 mb-1 small">Here we may have customfilters.</div>
+                        <div class="col-10 mb-1 small">Show All Trades which are up</div>
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+                    <a (click)="openTradeList('down')"  style ="background-color:red" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
                             <div class="d-flex w-100 align-items-center justify-content-between">
                                 <strong class="mb-1">WatchList 2</strong>
                                 <small>Tech
-                                        <mat-icon style="color:red">arrow_downward</mat-icon>
+                                        <mat-icon style="color:yellow">arrow_downward</mat-icon>
                                 </small>
                             </div>
-                            <div class="col-10 mb-1 small">Here we may have customfilters</div>
+                            <div class="col-10 mb-1 small">Show All Trades which are down</div>
                         </a>
 
                 </div>
             </div>
         </div>
-        <div class="col-9 border">
+        <div class="col-9">
             <router-outlet></router-outlet>
         </div>
 
     </div>
 </div>
+<footer class="sticky-footer">
+        <p>&copy; 2025 My Website</p>
+</footer>
