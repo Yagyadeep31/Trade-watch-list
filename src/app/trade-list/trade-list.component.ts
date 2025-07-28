@@ -1,6 +1,6 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef } from 'ag-grid-community'; 
+import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 import { provideGlobalGridOptions } from 'ag-grid-community';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select'; 
 import { MatTableModule } from '@angular/material/table'; 
 import { MatCardModule } from '@angular/material/card';
-
+import { Subscription } from 'rxjs';
 // Mark all grids as using legacy themes
 provideGlobalGridOptions({ theme: "legacy" });    
 ModuleRegistry.registerModules([ AllCommunityModule ]);
@@ -22,6 +22,7 @@ ModuleRegistry.registerModules([ AllCommunityModule ]);
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import { NgStyle } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { WebSocketService } from '../services/ws.service';
 
 @Component({
   selector: 'app-icon-cell-renderer',
@@ -67,13 +68,18 @@ export class IconCellRendererComponent implements ICellRendererAngularComp {
   styleUrl: './trade-list.component.css'
 })
 
-export class TradeListComponent {
+export class TradeListComponent implements OnInit {
   rowData: any[] = [];
+  public gridApi?: GridApi;
   defaultColDef: any ={
     flex: 1,
     minWidth:100
   }
-  constructor() {
+  private websocketSubscription?: Subscription ;
+  constructor(private socketService: WebSocketService) {
+
+
+
     this.rowData = [
       { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward' , timestamp: '2025-07-20T10:00:00Z' },
       { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50,trendz: 'arrow_upward', timestamp: '2025-07-20T10:05:00Z' },
@@ -90,6 +96,21 @@ export class TradeListComponent {
   ];
   }
 
+  ngOnInit () {
+    this.websocketSubscription = this.socketService.messages.subscribe(data => {
+      console.log('Received data from WebSocket:', data);
+      if (this.gridApi) {
+          // If it's the initial data, set rowData directly
+          if (data.length > 1) { // Assuming initial data is an array of multiple rows
+              this.rowData = data;
+          } else {
+              // For subsequent updates, use applyTransactionAsync for efficiency
+              this.gridApi.applyTransactionAsync({ update: data });
+          }
+      }
+  });
+  }
+
   colDefs: any[] = [
     { headerName: 'Trendz', field: 'trendz',  cellRenderer: IconCellRendererComponent },
     { headerName: 'Trade ID', field: 'tradeId' },
@@ -99,5 +120,19 @@ export class TradeListComponent {
     { headerName: 'Timestamp', field: 'timestamp' },
     // Add more columns as needed for your trade data
 ];
+
+onGridReady(params: any): void {
+  this.gridApi = params.api;
+}
+
+public getRowId = (params: any) => params.data.id;
+
+ngOnDestroy(): void {
+  if (this.websocketSubscription) {
+    this.websocketSubscription.unsubscribe(); // Unsubscribe to prevent memory leaks
+  }
+  this.socketService.disconnect(); // Disconnect when the component is destroyed
+}
+
 
 }

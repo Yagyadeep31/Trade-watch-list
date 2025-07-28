@@ -1,6 +1,39 @@
-<header>
-    <h3>Trade Watch List </h3>
-</header>
+<div class="container">
+    <div class="row">
+        <div class="col-3 border">
+            <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
+                <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+                    <svg class="bi pe-none me-2" width="30" height="24" aria-hidden="true">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg>
+                    <span class="fs-5 fw-semibold">Trade Watch List</span>
+                </a>
+                <div class="list-group list-group-flush border-bottom scrollarea">
+                    <a href="#" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
+                        <div class="d-flex w-100 align-items-center justify-content-between">
+                            <strong class="mb-1">WatchList 1</strong>
+                            <small>Cars
+                                <mat-icon  style="color:green">arrow_upward</mat-icon>
+                            </small>
+                        </div>
+                        <div class="col-10 mb-1 small">Here we may have customfilters.</div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+                            <div class="d-flex w-100 align-items-center justify-content-between">
+                                <strong class="mb-1">WatchList 2</strong>
+                                <small>Tech
+                                        <mat-icon style="color:red">arrow_downward</mat-icon>
+                                </small>
+                            </div>
+                            <div class="col-10 mb-1 small">Here we may have customfilters</div>
+                        </a>
 
-<a [routerLink]="['/tradeList']"> Click here to load Trade List Component or Directly go to url : /tradeList</a>
-<router-outlet></router-outlet>
+                </div>
+            </div>
+        </div>
+        <div class="col-9 border">
+            <router-outlet></router-outlet>
+        </div>
+
+    </div>
+</div>
