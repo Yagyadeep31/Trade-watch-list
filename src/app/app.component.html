@@ -1,45 +1,44 @@
-<header class="sticky-header">
-       <h2> Trade Dashboard </h2>
-</header>
-<div class="container main-content" style="margin-top:3%">
-    <div class="row">
-        <div class="col-3">
-            <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
-                <a (click)="openAllTradeList()" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
-                    <svg class="bi pe-none me-2" width="30" height="24" aria-hidden="true">
-                        <use xlink:href="#bootstrap"></use>
-                    </svg>
-                    <span class="fs-5 fw-semibold">Trade Watch List</span>
-                </a>
-                <div class="list-group list-group-flush border-bottom scrollarea">
-                    <a (click)="openTradeList('up')"  style ="background-color:green" class="list-group-item list-group-item-action  py-3 lh-sm" aria-current="true">
-                        <div class="d-flex w-100 align-items-center justify-content-between">
-                            <strong class="mb-1">WatchList 1</strong>
-                            <small>Cars
-                                <mat-icon  style="color:yellow">arrow_upward</mat-icon>
-                            </small>
-                        </div>
-                        <div class="col-10 mb-1 small">Show All Trades which are up</div>
-                    </a>
-                    <a (click)="openTradeList('down')"  style ="background-color:red" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
-                            <div class="d-flex w-100 align-items-center justify-content-between">
-                                <strong class="mb-1">WatchList 2</strong>
-                                <small>Tech
-                                        <mat-icon style="color:yellow">arrow_downward</mat-icon>
-                                </small>
-                            </div>
-                            <div class="col-10 mb-1 small">Show All Trades which are down</div>
-                        </a>
-
-                </div>
+<app-navbar></app-navbar>
+<div class="main-content" style="margin-top:0;">
+  <div class="row g-0">
+    <div class="col-12 col-md-4 col-lg-3">
+      <mat-card class="mat-elevation-z2 p-0 sidebar-card" style="min-height:100vh;border-radius:0 16px 16px 0;">
+        <div class="d-flex align-items-center p-3 border-bottom" style="background:#f5f5f5;">
+          <mat-icon color="primary" style="margin-right:8px;">list</mat-icon>
+          <span style="font-weight:600;font-size:1.1rem;">Watchlists</span>
+        </div>
+        <div class="list-group list-group-flush border-bottom scrollarea p-2">
+          <div *ngFor="let w of watchlists; let i = index"
+               class="list-group-item list-group-item-action py-3 lh-sm d-flex flex-column flex-md-row align-items-center"
+               [ngClass]="{'active': i === selectedWatchlistIndex}"
+               [style.background-color]="w.color || '#e3e3e3'">
+            <div class="d-flex flex-column flex-md-row w-100 align-items-center justify-content-between">
+              <div (click)="selectWatchlist(i)" style="cursor:pointer;flex:1">
+                <strong class="mb-1">{{ w.name }}</strong>
+                <small class="d-block d-md-inline">{{ w.description }}
+                  <mat-icon style="color:yellow">{{ w.trades.length > 0 ? w.trades[0].trendz : 'star' }}</mat-icon>
+                </small>
+              </div>
+              <div class="d-flex align-items-center ms-2 mt-2 mt-md-0">
+                <input type="color" [(ngModel)]="w.color" (change)="saveWatchlists()" style="width:32px;height:32px;border:none;background:none;cursor:pointer;" title="Pick color" />
+                <button mat-icon-button (click)="editWatchlist(i, $event)" title="Rename"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button (click)="deleteWatchlist(i, $event)" title="Delete"><mat-icon>delete</mat-icon></button>
+              </div>
             </div>
+          </div>
+          <button class="btn btn-sm btn-outline-primary mt-2" (click)="addWatchlist()">
+            <mat-icon>add</mat-icon> Add Watchlist
+          </button>
         </div>
-        <div class="col-9">
-            <router-outlet></router-outlet>
-        </div>
-
+      </mat-card>
     </div>
+    <div class="col-12 col-md-8 col-lg-9">
+      <div class="main-content-area" style="padding:2rem 1rem;">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
 </div>
-<footer class="sticky-footer">
-        <p>&copy; 2025 My Website</p>
-</footer>
+<mat-toolbar color="primary" class="sticky-footer mat-elevation-z4" style="justify-content:center;">
+  <span>&copy; 2025 Trade Watchlist</span>
+</mat-toolbar>

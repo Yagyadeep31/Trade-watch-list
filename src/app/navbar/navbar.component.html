@@ -1,0 +1,19 @@
+<mat-toolbar color="primary" class="navbar mat-elevation-z4" style="padding:0 2rem;">
+  <span class="navbar-title d-flex align-items-center">
+    <mat-icon style="margin-right:8px;">show_chart</mat-icon>
+    <span style="font-weight:600;font-size:1.35rem;letter-spacing:1px;">Trade Watchlists</span>
+  </span>
+  <span class="spacer"></span>
+  <button mat-flat-button color="accent" style="margin-right:12px;">
+    <mat-icon>add</mat-icon>
+    <span class="d-none d-md-inline">Add Watchlist</span>
+  </button>
+  <button mat-icon-button [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item>Profile</button>
+    <button mat-menu-item>Settings</button>
+    <button mat-menu-item>Logout</button>
+  </mat-menu>
+</mat-toolbar>

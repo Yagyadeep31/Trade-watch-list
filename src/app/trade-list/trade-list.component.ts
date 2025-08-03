@@ -20,10 +20,11 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 // my-custom-cell-renderer.component.ts
 import { ICellRendererAngularComp } from 'ag-grid-angular';
-import { NgStyle } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { NgStyle, CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { WebSocketService } from '../services/ws.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { WATCHLISTS } from '../watchlists';
 
 @Component({
   selector: 'app-icon-cell-renderer',
@@ -50,7 +51,7 @@ export class IconCellRendererComponent implements ICellRendererAngularComp {
 @Component({
   selector: 'app-trade-list',
   standalone: true,
-  imports: [AgGridAngular, MatIconModule,
+  imports: [CommonModule, FormsModule, AgGridAngular, MatIconModule,
     ReactiveFormsModule,
     MatToolbarModule,
     MatButtonModule,
@@ -62,7 +63,6 @@ export class IconCellRendererComponent implements ICellRendererAngularComp {
     MatSelectModule,
     MatTableModule,
     MatCardModule
-
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './trade-list.component.html',
@@ -71,6 +71,12 @@ export class IconCellRendererComponent implements ICellRendererAngularComp {
 
 export class TradeListComponent implements OnInit {
   rowData: any[] = [];
+  filteredRowData: any[] = [];
+  filterSymbol: string = '';
+  filterTrend: string = '';
+  filterMinPrice: number | null = null;
+  filterMaxPrice: number | null = null;
+  loading: boolean = false;
   filterType: any;
   public gridApi?: GridApi;
   defaultColDef: any = {
@@ -79,46 +85,23 @@ export class TradeListComponent implements OnInit {
   }
   private websocketSubscription?: Subscription;
 
-
   constructor(private socketService: WebSocketService, private router: ActivatedRoute) {
-
-    router.queryParams.subscribe(data => {
-      this.filterType = data['trendz'];
-      console.log("Yagyadeep", this.filterType);
-    })
-
-
-
-
-    this.rowData = [
-      { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward', timestamp: '2025-07-20T10:00:00Z' },
-      { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50, trendz: 'arrow_upward', timestamp: '2025-07-20T10:05:00Z' },
-      { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward', timestamp: '2025-07-20T10:00:00Z' },
-      { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50, trendz: 'arrow_downward', timestamp: '2025-07-20T10:05:00Z' },
-      { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward', timestamp: '2025-07-20T10:00:00Z' },
-      { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50, trendz: 'arrow_downward', timestamp: '2025-07-20T10:05:00Z' },
-      { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward', timestamp: '2025-07-20T10:00:00Z' },
-      { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50, trendz: 'arrow_downward', timestamp: '2025-07-20T10:05:00Z' },
-      { tradeId: 'T001', symbol: 'AAPL', price: 170.50, quantity: 100, trendz: 'arrow_upward', timestamp: '2025-07-20T10:00:00Z' },
-      { tradeId: 'T002', symbol: 'GOOGL', price: 1500.25, quantity: 50, trendz: 'arrow_downward', timestamp: '2025-07-20T10:05:00Z' },
-
-      // ... more trade data
-    ];
+    this.router.queryParams.subscribe(params => {
+      const watchlistIndex = params['watchlist'] ? +params['watchlist'] : 0;
+      this.socketService.emitTradesForWatchlist(watchlistIndex);
+      this.filterType = params['trendz'];
+    });
   }
 
   ngOnInit() {
-
+    this.loading = true;
     this.websocketSubscription = this.socketService.messages.subscribe(data => {
-      console.log('Received data from WebSocket:', data);
-    //  if (this.gridApi) {
-        // If it's the initial data, set rowData directly
-        if (data.length > 1) { // Assuming initial data is an array of multiple rows
-          this.rowData = data;
-        } else {
-          // For subsequent updates, use applyTransactionAsync for efficiency
-        //  this.gridApi.applyTransactionAsync({ update: data });
-        }
-     // }
+      this.loading = true;
+      setTimeout(() => {
+        this.rowData = data;
+        this.applyFilters();
+        this.loading = false;
+      }, 500); // Simulate loading
     });
   }
 
@@ -138,12 +121,29 @@ export class TradeListComponent implements OnInit {
 
   public getRowId = (params: any) => params.data.id;
 
+  applyFilters() {
+    this.filteredRowData = this.rowData.filter(row => {
+      const matchesSymbol = !this.filterSymbol || row.symbol?.toLowerCase().includes(this.filterSymbol.toLowerCase());
+      const matchesTrend = !this.filterTrend || row.trendz === this.filterTrend;
+      const matchesMin = this.filterMinPrice == null || row.price >= this.filterMinPrice;
+      const matchesMax = this.filterMaxPrice == null || row.price <= this.filterMaxPrice;
+      return matchesSymbol && matchesTrend && matchesMin && matchesMax;
+    });
+  }
+
+  clearFilters() {
+    this.filterSymbol = '';
+    this.filterTrend = '';
+    this.filterMinPrice = null;
+    this.filterMaxPrice = null;
+    this.applyFilters();
+  }
+
   ngOnDestroy(): void {
     if (this.websocketSubscription) {
       this.websocketSubscription.unsubscribe(); // Unsubscribe to prevent memory leaks
     }
     this.socketService.disconnect(); // Disconnect when the component is destroyed
   }
-
-
 }
+
